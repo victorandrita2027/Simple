@@ -213,7 +213,7 @@ function addGuest() {
 document.getElementById('rsvpForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // 1. !!! PASTE YOUR EXACT GOOGLE SCRIPT URL HERE !!!
+    // 1. Google Script Target URL
     const scriptUrl = 'https://script.google.com/macros/s/AKfycbw_FpxfH61mNEDnIHTmUJT8nDybQ0Yrpk1jghADAawqOX36qa1I9EnrKDk-WN0J7799DA/exec';
     
     const submitBtn = document.getElementById('submitBtn');
@@ -226,16 +226,13 @@ document.getElementById('rsvpForm').addEventListener('submit', function(e) {
     formData.forEach((value, key) => {
         payload[key] = value;
     });
-    
-    // Security matching token
-    payload["token"] = "MySuperSecretWeddingPassword123"; 
 
-    // 3. Post to Google Sheets Backend
+    // 3. Post to Google Sheets Backend (Bypassing preflight check constraints)
     fetch(scriptUrl, {
         method: 'POST',
         mode: 'no-cors', 
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'text/plain;charset=utf-8'
         },
         body: JSON.stringify(payload)
     })
