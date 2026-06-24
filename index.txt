@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit to Google Sheets</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4f7f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #666;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0070f3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #0051cb;
+    }
+    #statusMessage {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Contact Form</h2>
+  <form id="sheetForm">
+    <div class="form-group">
+      <label for="username">Name</label>
+      <input type="text" id="username" required placeholder="John Doe">
+    </div>
+    
+    <div class="form-group">
+      <label for="useremail">Email Address</label>
+      <input type="email" id="useremail" required placeholder="john@example.com">
+    </div>
+    
+    <button type="submit" id="submitBtn">Submit Data</button>
+  </form>
+  <div id="statusMessage"></div>
+</div>
+
+<script>
+  document.getElementById('sheetForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Stop the form from performing a traditional page reload
+
+    // --- PASTE YOUR EXACT GOOGLE APPS SCRIPT WEB APP URL HERE ---
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbycbI3RxpxhnRslrJYyBRdknsF9emotA6VoYBRql7h2b6G6qXBeyrhV3yY06hM8KUQtFg/exec';
+
+    const submitButton = document.getElementById('submitBtn');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // UI Updates during submission
+    submitButton.disabled = true;
+    submitButton.innerText = 'Sending...';
+    statusMessage.style.color = '#333';
+    statusMessage.innerText = 'Submitting your data...';
+
+    // Pack the data to match your Google Apps Script keys
+    const formData = {
+      name: document.getElementById('username').value,
+      email: document.getElementById('useremail').value
+    };
+
+    // Make the direct network request
+    fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors', // Crucial to bypass Google's CORS redirect constraints
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(() => {
+      // Due to 'no-cors', we safely assume success if the network request resolves
+      statusMessage.style.color = 'green';
+      statusMessage.innerText = 'Success! Data added to Google Sheets.';
+      document.getElementById('sheetForm').reset();
+    })
+    .catch(error => {
+      console.error('Submission error:', error);
+      statusMessage.style.color = 'red';
+      statusMessage.innerText = 'Error sending data. Please check connection.';
+    })
+    .finally(() => {
+      // Reset button state
+      submitButton.disabled = false;
+      submitButton.innerText = 'Submit Data';
+    });
+  });
+</script>
+
+</body>
+</html>
