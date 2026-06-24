@@ -35,6 +35,7 @@
         margin-top:6px;
         border-radius:6px;
         border:1px solid #ddd;
+        box-sizing: border-box;
     }
 
     .block {
@@ -54,6 +55,8 @@
         margin-top:20px;
         border-radius:6px;
         cursor:pointer;
+        font-size: 16px;
+        font-weight: bold;
     }
 
     #yes-section { display:none; margin-top:20px; }
@@ -184,7 +187,6 @@
 </div>
 
 <script>
-
 let guestIndex = 0;
 const maxGuests = 3;
 
@@ -209,11 +211,11 @@ function addGuest() {
     }
 }
 
-// --- NEW FRONTEND GOOGLE SHEET HANDLER ---
+// FRONTEND GOOGLE SHEET HANDLER
 document.getElementById('rsvpForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+    e.preventDefault(); // This strictly keeps the page from refreshing or submitting early
 
-    // 1. PLACE YOUR WEBA PP URL HERE
+    // 1. !!! PASTE YOUR RE-DEPLOYED GOOGLE APPS SCRIPT WEB APP URL HERE !!!
     const scriptUrl = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
     
     const submitBtn = document.getElementById('submitBtn');
@@ -224,18 +226,21 @@ document.getElementById('rsvpForm').addEventListener('submit', function(e) {
     statusMsg.style.color = '#333';
     statusMsg.innerText = 'Submitting...';
 
-    // 2. Automatically grab all current active input values
+    // 2. Safely capture all filled out data dynamically
     const formData = new FormData(this);
     const payload = {};
     
     formData.forEach((value, key) => {
         payload[key] = value;
     });
+    
+    // Add security token if you are using it (optional)
+    payload["token"] = "MySuperSecretWeddingPassword123"; 
 
-    // 3. Send data over to Google Sheets backend
+    // 3. Send data over to Google Sheets
     fetch(scriptUrl, {
         method: 'POST',
-        mode: 'no-cors', // Solves Google App Script standard CORS redirection restrictions
+        mode: 'no-cors', 
         headers: {
             'Content-Type': 'application/json'
         },
@@ -244,11 +249,15 @@ document.getElementById('rsvpForm').addEventListener('submit', function(e) {
     .then(() => {
         statusMsg.style.color = '#00AD9F';
         statusMsg.innerText = 'Thank you! Your RSVP has been saved.';
+        
+        // Reset the form structure beautifully back to zero
         document.getElementById('rsvpForm').reset();
         document.getElementById('guest-container').innerHTML = '';
         document.getElementById('yes-section').style.display = 'none';
         guestIndex = 0;
-        document.querySelector('button[onclick="addGuest()"]').style.display = 'block';
+        
+        const addGuestBtn = document.querySelector('button[onclick="addGuest()"]');
+        if(addGuestBtn) addGuestBtn.style.display = 'block';
     })
     .catch(error => {
         console.error('Error!', error);
