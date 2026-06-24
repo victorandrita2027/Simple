@@ -60,13 +60,26 @@
     }
 
     #yes-section { display:none; margin-top:20px; }
-
     .hidden { display:none; }
     
-    #statusMessage {
-        margin-top: 15px;
+    /* Thank you screen styles */
+    #thankYouScreen {
+        display: none;
         text-align: center;
-        font-weight: bold;
+        padding: 40px 20px;
+    }
+    #thankYouScreen h2 {
+        color: #00AD9F;
+        margin-bottom: 10px;
+    }
+    #thankYouScreen p {
+        color: #555;
+        font-size: 16px;
+    }
+    .success-icon {
+        font-size: 50px;
+        color: #00AD9F;
+        margin-bottom: 15px;
     }
 </style>
 </head>
@@ -75,60 +88,58 @@
 
 <div class="container">
 
-<h1>RSVP</h1>
+    <div id="formWrapper">
+        <h1>RSVP</h1>
+        <form id="rsvpForm">
 
-<form id="rsvpForm">
+        <label>Name on invitation</label>
+        <input type="text" name="respondent_name" required>
 
-<label>Name on invitation</label>
-<input type="text" name="respondent_name" required>
-
-<label>Will you be attending?</label>
-<select name="attendance" onchange="toggleAttendance(this.value)" required>
-    <option value="">Select</option>
-    <option value="Yes">Yes</option>
-    <option value="No">No</option>
-</select>
-
-<div id="yes-section">
-
-    <h3>Your Details</h3>
-
-    <div class="block">
-        <h4>Main Guest</h4>
-
-        <label>Meal Preference</label>
-        <select name="main_meal">
-            <option></option>
-            <option>Vegan</option>
-            <option>Vegetarian</option>
-            <option>Fish</option>
-            <option>Meat</option>
+        <label>Will you be attending?</label>
+        <select name="attendance" onchange="toggleAttendance(this.value)" required>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
         </select>
 
-        <label>Dietary Requirements</label>
-        <textarea name="main_diet"></textarea>
+        <div id="yes-section">
+            <h3>Your Details</h3>
+            <div class="block">
+                <h4>Main Guest</h4>
+                <label>Meal Preference</label>
+                <select name="main_meal">
+                    <option></option>
+                    <option>Vegan</option>
+                    <option>Vegetarian</option>
+                    <option>Fish</option>
+                    <option>Meat</option>
+                </select>
+                <label>Dietary Requirements</label>
+                <textarea name="main_diet"></textarea>
+            </div>
+
+            <h3>Guests</h3>
+            <div id="guest-container"></div>
+            <button type="button" onclick="addGuest()">+ Add Guest</button>
+        </div>
+
+        <button type="submit" id="submitBtn">Submit RSVP</button>
+        </form>
     </div>
 
-    <h3>Guests</h3>
-
-    <div id="guest-container"></div>
-
-    <button type="button" onclick="addGuest()">+ Add Guest</button>
+    <div id="thankYouScreen">
+        <div class="success-icon">✓</div>
+        <h2>Submission Complete!</h2>
+        <p>Thank you for letting us know. Your details have been successfully saved.</p>
+    </div>
 
 </div>
 
-<button type="submit" id="submitBtn">Submit RSVP</button>
-
-<div id="statusMessage"></div>
-
 <div class="hidden">
-
     <div id="g1" class="block">
         <h4>Guest 1</h4>
-
         <label>Name</label>
         <input name="guest_1_name">
-
         <label>Meal Preference</label>
         <select name="guest_1_meal">
             <option></option>
@@ -137,17 +148,14 @@
             <option>Fish</option>
             <option>Meat</option>
         </select>
-
         <label>Dietary Requirements</label>
         <textarea name="guest_1_diet"></textarea>
     </div>
 
     <div id="g2" class="block">
         <h4>Guest 2</h4>
-
         <label>Name</label>
         <input name="guest_2_name">
-
         <label>Meal Preference</label>
         <select name="guest_2_meal">
             <option></option>
@@ -156,17 +164,14 @@
             <option>Fish</option>
             <option>Meat</option>
         </select>
-
         <label>Dietary Requirements</label>
         <textarea name="guest_2_diet"></textarea>
     </div>
 
     <div id="g3" class="block">
         <h4>Guest 3</h4>
-
         <label>Name</label>
         <input name="guest_3_name">
-
         <label>Meal Preference</label>
         <select name="guest_3_meal">
             <option></option>
@@ -175,15 +180,9 @@
             <option>Fish</option>
             <option>Meat</option>
         </select>
-
         <label>Dietary Requirements</label>
         <textarea name="guest_3_diet"></textarea>
     </div>
-
-</div>
-
-</form>
-
 </div>
 
 <script>
@@ -197,7 +196,6 @@ function toggleAttendance(value) {
 
 function addGuest() {
     if (guestIndex >= maxGuests) return;
-
     guestIndex++;
 
     const template = document.getElementById('g' + guestIndex);
@@ -211,33 +209,28 @@ function addGuest() {
     }
 }
 
-// FRONTEND GOOGLE SHEET HANDLER
+// FRONTEND SUBMIT HANDLER
 document.getElementById('rsvpForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // This strictly keeps the page from refreshing or submitting early
+    e.preventDefault();
 
-    // 1. !!! PASTE YOUR RE-DEPLOYED GOOGLE APPS SCRIPT WEB APP URL HERE !!!
+    // 1. !!! PASTE YOUR EXACT GOOGLE SCRIPT URL HERE !!!
     const scriptUrl = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
     
     const submitBtn = document.getElementById('submitBtn');
-    const statusMsg = document.getElementById('statusMessage');
-
     submitBtn.disabled = true;
     submitBtn.innerText = 'Sending RSVP...';
-    statusMsg.style.color = '#333';
-    statusMsg.innerText = 'Submitting...';
 
-    // 2. Safely capture all filled out data dynamically
+    // 2. Capture all fields dynamically
     const formData = new FormData(this);
     const payload = {};
-    
     formData.forEach((value, key) => {
         payload[key] = value;
     });
     
-    // Add security token if you are using it (optional)
+    // Security matching token
     payload["token"] = "MySuperSecretWeddingPassword123"; 
 
-    // 3. Send data over to Google Sheets
+    // 3. Post to Google Sheets Backend
     fetch(scriptUrl, {
         method: 'POST',
         mode: 'no-cors', 
@@ -247,24 +240,13 @@ document.getElementById('rsvpForm').addEventListener('submit', function(e) {
         body: JSON.stringify(payload)
     })
     .then(() => {
-        statusMsg.style.color = '#00AD9F';
-        statusMsg.innerText = 'Thank you! Your RSVP has been saved.';
-        
-        // Reset the form structure beautifully back to zero
-        document.getElementById('rsvpForm').reset();
-        document.getElementById('guest-container').innerHTML = '';
-        document.getElementById('yes-section').style.display = 'none';
-        guestIndex = 0;
-        
-        const addGuestBtn = document.querySelector('button[onclick="addGuest()"]');
-        if(addGuestBtn) addGuestBtn.style.display = 'block';
+        // Hide the form entirely and reveal the custom "Submission Complete" view!
+        document.getElementById('formWrapper').style.display = 'none';
+        document.getElementById('thankYouScreen').style.display = 'block';
     })
     .catch(error => {
-        console.error('Error!', error);
-        statusMsg.style.color = 'red';
-        statusMsg.innerText = 'Oops, something went wrong. Please try again.';
-    })
-    .finally(() => {
+        console.error('Error sending form data:', error);
+        alert('Oops! There was a connection problem. Please try clicking submit again.');
         submitBtn.disabled = false;
         submitBtn.innerText = 'Submit RSVP';
     });
