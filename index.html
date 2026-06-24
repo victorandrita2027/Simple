@@ -1,138 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Submit to Google Sheets</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSVP</title>
+
+<style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f4f7f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+        font-family: Arial, sans-serif;
+        max-width: 650px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f7f7f7;
     }
-    .form-container {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 400px;
+
+    .container {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    h2 {
-      margin-top: 0;
-      color: #333;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
+
+    h1 { text-align:center; color:#00AD9F; }
+
     label {
-      display: block;
-      margin-bottom: 5px;
-      color: #666;
-      font-weight: 500;
+        display:block;
+        margin-top:15px;
+        font-weight:bold;
     }
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 14px;
+
+    input, select, textarea {
+        width:100%;
+        padding:10px;
+        margin-top:6px;
+        border-radius:6px;
+        border:1px solid #ddd;
     }
+
+    .block {
+        margin-top:15px;
+        padding:15px;
+        background:#fafafa;
+        border-radius:8px;
+        border:1px solid #eee;
+    }
+
     button {
-      width: 100%;
-      padding: 12px;
-      background-color: #0070f3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
+        background:#00AD9F;
+        color:white;
+        border:none;
+        padding:12px;
+        width:100%;
+        margin-top:20px;
+        border-radius:6px;
+        cursor:pointer;
     }
-    button:hover {
-      background-color: #0051cb;
-    }
+
+    #yes-section { display:none; margin-top:20px; }
+
+    .hidden { display:none; }
+    
     #statusMessage {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
+        margin-top: 15px;
+        text-align: center;
+        font-weight: bold;
     }
-  </style>
+</style>
 </head>
+
 <body>
 
-<div class="form-container">
-  <h2>Contact Form</h2>
-  <form id="sheetForm">
-    <div class="form-group">
-      <label for="username">Name</label>
-      <input type="text" id="username" required placeholder="John Doe">
+<div class="container">
+
+<h1>RSVP</h1>
+
+<form id="rsvpForm">
+
+<label>Name on invitation</label>
+<input type="text" name="respondent_name" required>
+
+<label>Will you be attending?</label>
+<select name="attendance" onchange="toggleAttendance(this.value)" required>
+    <option value="">Select</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+</select>
+
+<div id="yes-section">
+
+    <h3>Your Details</h3>
+
+    <div class="block">
+        <h4>Main Guest</h4>
+
+        <label>Meal Preference</label>
+        <select name="main_meal">
+            <option></option>
+            <option>Vegan</option>
+            <option>Vegetarian</option>
+            <option>Fish</option>
+            <option>Meat</option>
+        </select>
+
+        <label>Dietary Requirements</label>
+        <textarea name="main_diet"></textarea>
     </div>
-    
-    <div class="form-group">
-      <label for="useremail">Email Address</label>
-      <input type="email" id="useremail" required placeholder="john@example.com">
+
+    <h3>Guests</h3>
+
+    <div id="guest-container"></div>
+
+    <button type="button" onclick="addGuest()">+ Add Guest</button>
+
+</div>
+
+<button type="submit" id="submitBtn">Submit RSVP</button>
+
+<div id="statusMessage"></div>
+
+<div class="hidden">
+
+    <div id="g1" class="block">
+        <h4>Guest 1</h4>
+
+        <label>Name</label>
+        <input name="guest_1_name">
+
+        <label>Meal Preference</label>
+        <select name="guest_1_meal">
+            <option></option>
+            <option>Vegan</option>
+            <option>Vegetarian</option>
+            <option>Fish</option>
+            <option>Meat</option>
+        </select>
+
+        <label>Dietary Requirements</label>
+        <textarea name="guest_1_diet"></textarea>
     </div>
-    
-    <button type="submit" id="submitBtn">Submit Data</button>
-  </form>
-  <div id="statusMessage"></div>
+
+    <div id="g2" class="block">
+        <h4>Guest 2</h4>
+
+        <label>Name</label>
+        <input name="guest_2_name">
+
+        <label>Meal Preference</label>
+        <select name="guest_2_meal">
+            <option></option>
+            <option>Vegan</option>
+            <option>Vegetarian</option>
+            <option>Fish</option>
+            <option>Meat</option>
+        </select>
+
+        <label>Dietary Requirements</label>
+        <textarea name="guest_2_diet"></textarea>
+    </div>
+
+    <div id="g3" class="block">
+        <h4>Guest 3</h4>
+
+        <label>Name</label>
+        <input name="guest_3_name">
+
+        <label>Meal Preference</label>
+        <select name="guest_3_meal">
+            <option></option>
+            <option>Vegan</option>
+            <option>Vegetarian</option>
+            <option>Fish</option>
+            <option>Meat</option>
+        </select>
+
+        <label>Dietary Requirements</label>
+        <textarea name="guest_3_diet"></textarea>
+    </div>
+
+</div>
+
+</form>
+
 </div>
 
 <script>
-  document.getElementById('sheetForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Stop the form from performing a traditional page reload
 
-    // --- PASTE YOUR EXACT GOOGLE APPS SCRIPT WEB APP URL HERE ---
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbycbI3RxpxhnRslrJYyBRdknsF9emotA6VoYBRql7h2b6G6qXBeyrhV3yY06hM8KUQtFg/exec';
+let guestIndex = 0;
+const maxGuests = 3;
 
-    const submitButton = document.getElementById('submitBtn');
-    const statusMessage = document.getElementById('statusMessage');
+function toggleAttendance(value) {
+    document.getElementById('yes-section').style.display =
+        value === "Yes" ? "block" : "none";
+}
 
-    // UI Updates during submission
-    submitButton.disabled = true;
-    submitButton.innerText = 'Sending...';
-    statusMessage.style.color = '#333';
-    statusMessage.innerText = 'Submitting your data...';
+function addGuest() {
+    if (guestIndex >= maxGuests) return;
 
-    // Pack the data to match your Google Apps Script keys
-    const formData = {
-      name: document.getElementById('username').value,
-      email: document.getElementById('useremail').value
-    };
+    guestIndex++;
 
-    // Make the direct network request
+    const template = document.getElementById('g' + guestIndex);
+    const clone = template.cloneNode(true);
+
+    const container = document.getElementById('guest-container');
+    container.appendChild(clone);
+
+    if (guestIndex === maxGuests) {
+        document.querySelector('button[onclick="addGuest()"]').style.display = 'none';
+    }
+}
+
+// --- NEW FRONTEND GOOGLE SHEET HANDLER ---
+document.getElementById('rsvpForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // 1. PLACE YOUR WEBA PP URL HERE
+    const scriptUrl = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMessage');
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Sending RSVP...';
+    statusMsg.style.color = '#333';
+    statusMsg.innerText = 'Submitting...';
+
+    // 2. Automatically grab all current active input values
+    const formData = new FormData(this);
+    const payload = {};
+    
+    formData.forEach((value, key) => {
+        payload[key] = value;
+    });
+
+    // 3. Send data over to Google Sheets backend
     fetch(scriptUrl, {
-      method: 'POST',
-      mode: 'no-cors', // Crucial to bypass Google's CORS redirect constraints
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
+        method: 'POST',
+        mode: 'no-cors', // Solves Google App Script standard CORS redirection restrictions
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
     })
     .then(() => {
-      // Due to 'no-cors', we safely assume success if the network request resolves
-      statusMessage.style.color = 'green';
-      statusMessage.innerText = 'Success! Data added to Google Sheets.';
-      document.getElementById('sheetForm').reset();
+        statusMsg.style.color = '#00AD9F';
+        statusMsg.innerText = 'Thank you! Your RSVP has been saved.';
+        document.getElementById('rsvpForm').reset();
+        document.getElementById('guest-container').innerHTML = '';
+        document.getElementById('yes-section').style.display = 'none';
+        guestIndex = 0;
+        document.querySelector('button[onclick="addGuest()"]').style.display = 'block';
     })
     .catch(error => {
-      console.error('Submission error:', error);
-      statusMessage.style.color = 'red';
-      statusMessage.innerText = 'Error sending data. Please check connection.';
+        console.error('Error!', error);
+        statusMsg.style.color = 'red';
+        statusMsg.innerText = 'Oops, something went wrong. Please try again.';
     })
     .finally(() => {
-      // Reset button state
-      submitButton.disabled = false;
-      submitButton.innerText = 'Submit Data';
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Submit RSVP';
     });
-  });
+});
 </script>
 
 </body>
